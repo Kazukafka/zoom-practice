@@ -19,7 +19,7 @@ const contactsMenuButtons = [
   },
   {
     type: "contact",
-    name: "Milim Narva",
+    name: "Milim Nava",
     photo: require("../assets/milim.png")
   }
 
