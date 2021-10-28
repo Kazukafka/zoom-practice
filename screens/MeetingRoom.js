@@ -1,46 +1,45 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { View, Text, StyleSheet, TextInput, Touchable } from 'react-native'
 import { TouchableOpacity } from 'react-native-gesture-handler'
+import StartMeeting from '../components/StartMeeting'
+import { io } from "socket.io-client"
+
+let socket;
 
 function MeetingRoom() {
   const [name, setName] = useState()
   const [roomId, setRoomId] = useState()
+  const [activeUsers, setActiveUsers] = useState();
+
+  const joinRoom = () => {
+    socket.emit('join-room', { roomId: roomId, userName: name })
+  }
+
+  useEffect(() => {
+    // ここはngrokを使って外部時からアクセス可能にしてからURLを貼り付ける
+    //ngrok is the tool that makes you personal URL able to access from third-party
+    // つまり、順序ではターミナルで「ngrok http 3001」を先に実行する必要がある
+    //At first, you need to do "ngrok http 3001"
+    socket = io("http://cccc-126-149-24-187.ngrok.io/");
+    socket.on('connection', () => console.log("connected"))
+    socket.on("all-users", users => {
+      console.log("Active Users");
+      console.log(users)
+      setActiveUsers(users)
+    })
+  }, [])
+
   return (
-    // StartMeetingSection
     <View style={styles.container}>
-      <View style={styles.startMeetingContainer}>
-        <View style={styles.info}>
-          <TextInput
-            style={styles.textInput}
-            value={name}
-            placeholder="Enter name"
-            placeholderTextColor="#767467"
-            onChangeText={text => setName(text)}
-          />
-
-        </View>
-        <View style={styles.info}>
-          <TextInput
-            style={styles.textInput}
-            value={roomId}
-            placeholder="Enter room ID"
-            placeholderTextColor="#767467"
-            onChangeText={text => setRoomId(text)}
-          />
-        </View>
-        <View style={{ alignItems: "center" }}>
-          <TouchableOpacity
-            onPress={() => { }}
-            style={styles.startMeetingButton}
-          >
-            <Text style={{ color: "white" }}>
-              Start Meeting
-            </Text>
-
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View >
+      {/* StartMeetingSection */}
+      <StartMeeting
+        name={name}
+        setName={setName}
+        roomId={roomId}
+        setRoomId={setRoomId}
+        joinRoom={joinRoom}
+      />
+    </View>
   )
 }
 
@@ -51,26 +50,5 @@ const styles = StyleSheet.create({
     backgroundColor: "#1c1c1c",
     flex: 1
   },
-  info: {
-    width: "100%",
-    backgroundColor: "#373538",
-    height: 50,
-    borderTopWidth: 1,
-    borderColor: "#484648",
-    padding: 12,
-    justifyContent: "center"
-  },
-  textInput: {
-    color: "white",
-    fontSize: 18
-  },
-  startMeetingButton: {
-    width: 350,
-    marginTop: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#0470DC",
-    height: 50,
-    borderRadius: 15
-  }
+
 })
